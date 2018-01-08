@@ -40,13 +40,13 @@ public class AuthenticationFilter extends GenericFilterBean {
 
 	public AuthenticationFilter(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
-		
+
 	}
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		System.out.println("Executing**************"+AuthenticationFilter.class.getName());
+		System.out.println("Executing**************" + AuthenticationFilter.class.getName());
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
@@ -56,7 +56,7 @@ public class AuthenticationFilter extends GenericFilterBean {
 
 		String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
 		System.out.println(resourcePath);
-		logger.info("user ->"+resourcePath);
+		logger.info("user ->" + resourcePath);
 		try {
 			if (postToAuthenticate(httpRequest, resourcePath)) {
 				logger.info("Trying to authenticate user {} by X-Auth-Username method", username);
@@ -73,10 +73,10 @@ public class AuthenticationFilter extends GenericFilterBean {
 		} catch (InternalAuthenticationServiceException internalAuthenticationServiceException) {
 			SecurityContextHolder.clearContext();
 			logger.info("Internal authentication service exception", internalAuthenticationServiceException);
-			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			new CustomServerErrorResponse().commence(httpRequest, httpResponse, internalAuthenticationServiceException);
 		} catch (AuthenticationException authenticationException) {
 			SecurityContextHolder.clearContext();
-			httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, authenticationException.getMessage());
+			new CustomUnauthorizedResponse().commence(httpRequest, httpResponse, authenticationException);
 		} finally {
 			MDC.remove(TOKEN_SESSION_KEY);
 			MDC.remove(USER_SESSION_KEY);
@@ -117,7 +117,7 @@ public class AuthenticationFilter extends GenericFilterBean {
 				httpRequest);
 		SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
 		httpResponse.setStatus(HttpServletResponse.SC_OK);
-		Response response=new Response();
+		Response response = new Response();
 		response.setCode(CustomResponse.SUCCESS.getCode());
 		response.setMessage(CustomResponse.SUCCESS.getMessage());
 		response.setData(resultOfAuthentication.getDetails());

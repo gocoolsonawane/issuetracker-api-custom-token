@@ -11,9 +11,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import com.gocool.myissuetracker.config.security.AuthenticationFilter;
+import com.gocool.myissuetracker.config.security.CustomForbiddenResponse;
 import com.gocool.myissuetracker.config.security.CustomUnauthorizedResponse;
 import com.gocool.myissuetracker.config.security.TokenAuthenticationProvider;
 import com.gocool.myissuetracker.config.security.UsernamePasswordAuthenticationProvider;
@@ -30,9 +32,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 
 		http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-				.anonymous().disable().exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
+				.anonymous().disable().exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint())
+				.accessDeniedHandler(accessDeniedHandler());
 
 		http.addFilterBefore(new AuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class);
+	}
+
+	private AccessDeniedHandler accessDeniedHandler() {
+		return new CustomForbiddenResponse();
 	}
 
 	@Override
@@ -59,7 +66,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return new UserService();
 	}
 
-	@Bean
 	public AuthenticationEntryPoint unauthorizedEntryPoint() {
 		return new CustomUnauthorizedResponse();
 

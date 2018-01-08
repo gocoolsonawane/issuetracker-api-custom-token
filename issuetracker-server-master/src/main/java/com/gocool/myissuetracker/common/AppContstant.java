@@ -10,7 +10,7 @@ public interface AppContstant {
 
 	public enum CustomResponse {
 		SUCCESS(0, "Success"), ERROR(-1, "Error"), INVALID_FORMAT(-1, "Invalid request format"), UNAUTHORIZED(401,
-				"FORBIDDEN"), G(403, "Forbidden");
+				"Unauthorized"), FORBIDDEN(403, "Forbidden"), INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
 		private Integer code;
 		private String message;
